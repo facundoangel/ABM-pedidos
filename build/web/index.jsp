@@ -34,6 +34,7 @@
     String query_type_order = request.getParameter("type");
     if(query!=null)
         query.replaceAll("-", " ");
+    String query_search = request.getParameter("search");
     
     
     
@@ -231,8 +232,8 @@
             <button data-value="salon" class="filter-btn <%= query_type_order!=null && query_type_order.equals("salon") ? "active": "" %>" onclick="setFilter(this)">Salón</button>
             <div class="search-bar">
                 <span style="color:var(--mist)">🔍</span>
-                <input type="text" placeholder="Numero de pedido...">
-                <button class="btn-primary">
+                <input id="nro-order" type="text" placeholder="Numero de pedido..." value="<%= query_search!=null ? query_search : ""%>">
+                <button class="btn-primary" id="btn-find">
                     Buscar
                 </button>
             </div>
@@ -260,7 +261,9 @@
                 for(Pedido ped : pedidos){
                     
                     
-                     
+                    if(query_search != null && !query_search.isEmpty() && ped.getId()!=Integer.parseInt(query_search))
+                            continue;
+                    
                     if(query != null && !query.isEmpty() && !ped.getEstado().equalsIgnoreCase(query.replaceAll("-", " ")))
                             continue;
                     
@@ -327,7 +330,10 @@
                     
                 </script>
             <%
-                    contador++;
+                       contador++;
+                    if(query_search != null && !query_search.isEmpty() && ped.getId()==Integer.parseInt(query_search))
+                        break;
+                    
                 }
 
 
@@ -548,6 +554,13 @@
             location.search="?"+search.toString();
         }
     }
+    
+    document.getElementById("btn-find").addEventListener("click",()=>{
+        const search = new URLSearchParams(location.search);
+        const search_term = document.getElementById("nro-order").value;
+        search.set("search",search_term);
+        location.search="?"+search.toString();
+    });
 
     /* ─── SIDEBAR (mobile/tablet drawer) ─── */
     function toggleSidebar() {
