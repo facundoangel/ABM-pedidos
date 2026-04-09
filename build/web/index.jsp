@@ -233,7 +233,7 @@
             <div class="search-bar">
                 <span style="color:var(--mist)">🔍</span>
                 <input id="nro-order" type="text" placeholder="Numero de pedido..." value="<%= query_search!=null ? query_search : ""%>">
-                <button class="btn-primary" id="btn-find">
+                <button type="button"class="btn-primary" id="btn-find">
                     Buscar
                 </button>
             </div>
@@ -271,7 +271,10 @@
                             continue;
                 %>
 
-                <div class="order-row" id="row<%=contador%>" onclick="selectOrder(<%=contador%>)" style="animation-delay:0s">
+                <div class="order-row" id="row<%=contador%>" style="animation-delay:0s"
+                        data-order="<%=ped.getId()%>" data-nombre-cliente="<%=ped.getNombre_cliente()%>" data-items="<%=ped.getItems()%>"
+                        data-total="<%=ped.getPrecio()%>" data-direccion="<%=ped.getDireccion()%>" data-estado="<%=ped.getEstado()%>"
+                     >
                     <div class="order-id">#<%=ped.getId()%></div>
                     <div class="customer-info">
                         <span class="customer-name"><%=ped.getNombre_cliente()%></span>
@@ -316,13 +319,16 @@
                             <option value="nuevo"       <%=ped.getEstado().equalsIgnoreCase("nuevo")       ? "selected" : ""%>>Nuevo</option>
                             <option value="preparacion" <%=ped.getEstado().equalsIgnoreCase("preparacion") ? "selected" : ""%>>Preparación</option>
                             <option value="listo"       <%=ped.getEstado().equalsIgnoreCase("listo")       ? "selected" : ""%>>Listo</option>
-                            <option value="en camino"   <%=ped.getEstado().equalsIgnoreCase("en camino")   ? "selected" : ""%>>En camino</option>
+                            <option value="en camino"   <%=ped.getEstado().equalsIgnoreCase("en camino")   ? "selected" : ""%>>En camino/Por servir</option>
                             <option value="cancelado"   <%=ped.getEstado().equalsIgnoreCase("cancelado")   ? "selected" : ""%>>Cancelado</option>
                         </select>
                         <input name="id-pedido" type="hidden" value="<%=ped.getId()%>"/>
                     </form>
                 </div>
                 <script>
+                    document.getElementById("row<%=contador%>").addEventListener("click",function(e){
+                        selectOrder(this);
+                    });
                     document.getElementById("select-state-<%=ped.getId()%>").addEventListener("change",()=>{
                         document.getElementById("form-change-status-<%=ped.getId()%>").submit();
                     });
@@ -371,24 +377,8 @@
 
             <div class="detail-section">
                 <div class="detail-section-title">Items del pedido</div>
-                <div class="item-line">
-                    <span class="item-qty">x2</span>
-                    <span class="item-name">Pizza Margherita Grande</span>
-                    <span class="item-price">$24.00</span>
-                </div>
-                <div class="item-line">
-                    <span class="item-qty">x1</span>
-                    <span class="item-name">Coca-Cola 500ml</span>
-                    <span class="item-price">$4.00</span>
-                </div>
-                <div class="item-line" style="border:none">
-                                    <span class="item-qty"
-                                          style="background:transparent; color:var(--mist); font-size:11px">Extra</span>
-                    <span class="item-name" style="color:var(--mist); font-size:12px">Sin cebolla en
-                                        ambas
-                                        pizzas</span>
-                    <span></span>
-                </div>
+                <div class="detail-section-order"></div>
+
                 <div class="total-row">
                     <span class="total-label">Total</span>
                     <span class="total-amount">$38.00</span>
@@ -400,7 +390,6 @@
                 <div class="address-card">
                     <div class="street">Av. Corrientes 1240, Piso 3 "B"</div>
                     <div style="font-size:12px;color:var(--mist)">CABA, Buenos Aires</div>
-                    <div class="notes">🔔 Timbre roto — llamar al llegar</div>
                 </div>
             </div>
 
@@ -409,39 +398,25 @@
                 <div class="timeline">
                     <div class="tl-item">
                         <div class="tl-dot done"></div>
-                        <div class="tl-label">Pedido recibido</div>
-                        <div class="tl-time">14:32</div>
-                    </div>
-                    <div class="tl-item">
-                        <div class="tl-dot done"></div>
-                        <div class="tl-label">Aceptado por cocina</div>
-                        <div class="tl-time">14:34</div>
-                    </div>
-                    <div class="tl-item">
-                        <div class="tl-dot current"></div>
-                        <div class="tl-label">En preparación</div>
+                        <div class="tl-label">Nuevo</div>
                         <div class="tl-time">En progreso...</div>
                     </div>
                     <div class="tl-item">
-                        <div class="tl-dot"></div>
-                        <div class="tl-label" style="color:var(--mist)">Listo para despacho</div>
+                        <div class="tl-dot done"></div>
+                        <div class="tl-label">En Preparación</div>
+                        <div class="tl-time">En progreso...</div>
                     </div>
                     <div class="tl-item">
-                        <div class="tl-dot"></div>
-                        <div class="tl-label" style="color:var(--mist)">En camino</div>
+                        <div class="tl-dot current"></div>
+                        <div class="tl-label">En camino / Por servir a mesa</div>
+                        <div class="tl-time">En progreso...</div>
                     </div>
                     <div class="tl-item">
-                        <div class="tl-dot"></div>
-                        <div class="tl-label" style="color:var(--mist)">Entregado</div>
+                        <div class="tl-dot future"></div>
+                        <div class="tl-label" style="color:var(--mist)">Listo</div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="panel-footer">
-            <button class="btn-ghost" onclick="toastMsg('Pedido impreso')">🖨 Imprimir</button>
-            <button class="btn-success" onclick="toastMsg('✅ Pedido #1042 enviado a despacho')">Marcar
-                Listo
-                →</button>
         </div>
     </aside>
 
@@ -449,17 +424,17 @@
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
-    <form name="new-order" method="POST" action="<%= request.getContextPath()%>/ControladorPedServlet">
+    <form name="new-order" method="GET" action="<%= request.getContextPath()%>/ControladorPedServlet">
     	<div class="modal">
 	        <div class="modal-title">NUEVO PEDIDO</div>
 	        <div class="form-grid">
 	            <div class="form-group">
 	                <label class="form-label">Nombre cliente</label>
-	                <input class="form-input" type="text" placeholder="Ej: Juan García" name="name-customer">
+	                <input required class="form-input" type="text" placeholder="Ej: Juan García" name="name-customer">
 	            </div>
 	            <div class="form-group">
 	                <label class="form-label">Teléfono</label>
-	                <input class="form-input" type="text" placeholder="+54 11 0000-0000" name="phone-customer">
+	                <input required class="form-input" type="text" placeholder="+54 11 0000-0000" name="phone-customer">
 	            </div>
 	            <div class="form-group">
 	                <label class="form-label">Tipo</label>
@@ -471,19 +446,19 @@
 	            </div>
 	            <div class="form-group">
 	                <label class="form-label">Mesa / Repartidor</label>
-	                <input class="form-input" type="text" placeholder="Mesa 3 / Juan" name="mesa-repartidor">
+	                <input required class="form-input" type="text" placeholder="Mesa 3 / Juan" name="mesa-repartidor">
 	            </div>
 	            <div class="form-group full">
 	                <label class="form-label">Dirección</label>
-	                <input class="form-input" type="text" placeholder="Calle, número, piso, dpto..." name="direccion-entrega">
+	                <input required class="form-input" type="text" placeholder="Calle, número, piso, dpto..." name="direccion-entrega">
 	            </div>
 	            <div class="form-group full">
 	                <label class="form-label">Items del pedido</label>
-	                <input class="form-input" type="text" placeholder="x2 Margherita, x1 Coca-Cola..." name="items-pedido">
+	                <input required class="form-input" type="text" placeholder="x2 Margherita, x1 Coca-Cola..." name="items-pedido">
 	            </div>
 	            <div class="form-group">
 	                <label class="form-label">Total</label>
-	                <input class="form-input" type="text" placeholder="$0.00" name="total-pedido">
+	                <input required class="form-input" type="text" placeholder="$0.00" name="total-pedido">
 	            </div>
 	            <div class="form-group">
 	                <label class="form-label">Pago</label>
@@ -495,11 +470,11 @@
 	            </div>
 	            <div class="form-group full">
 	                <label class="form-label">Notas adicionales</label>
-	                <input class="form-input" type="text" placeholder="Sin cebolla, extra queso..." name="notas-pedido">
+	                <input required class="form-input" type="text" placeholder="Sin cebolla, extra queso..." name="notas-pedido">
 	            </div>
 	        </div>
 	        <div class="modal-footer">
-	            <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+	            <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
 	            <button class="btn-confirm" onclick="submitOrder()">Crear Pedido →</button>
 	        </div>
 	    </div>
@@ -586,12 +561,67 @@
     }
 
     /* ─── PANEL (detail) ─── */
-    function openPanel() {
+    function openPanel(data) {
         const panel = document.getElementById('detailPanel');
         const overlay = document.getElementById('panelOverlay');
         panel.classList.add('open');
         overlay.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        
+        
+        
+        panel.querySelector(".detail-order-id").innerText="#"+data.order;
+        panel.querySelector(".detail-meta").innerText=data.nombreCliente+" · 🛵 Delivery";
+        const items = data.items.replace("[","").replace("]","").split(",");
+        const items_panel = panel.querySelector(".detail-section-order");
+        items_panel.innerHTML="";
+
+        items.forEach(item => {
+            let new_elem = `
+                <div class="item-line">
+                    <span class="item-qty">x1</span>
+                    <span class="item-name">`;
+             new_elem += item + "</span></div>";
+            items_panel.innerHTML += new_elem;
+        });
+        
+        
+        panel.querySelector(".total-amount").innerText="$"+data.total;
+        panel.querySelector(".street").innerText=data.direccion;
+        
+        const states = panel.querySelectorAll(".timeline .tl-item");
+        debugger;
+        switch(data.estado){
+            case "nuevo":
+                states[0].children[0].setAttribute("class","tl-dot current");
+                states[1].children[0].setAttribute("class","tl-dot future");
+                states[2].children[0].setAttribute("class","tl-dot future");
+                states[3].children[0].setAttribute("class","tl-dot future");
+                break;
+
+            case "preparacion":
+                states[0].children[0].setAttribute("class","tl-dot done");
+                states[1].children[0].setAttribute("class","tl-dot current");
+                states[2].children[0].setAttribute("class","tl-dot future");
+                states[3].children[0].setAttribute("class","tl-dot future");
+                break;
+
+            case "en camino":
+                states[0].children[0].setAttribute("class","tl-dot done");
+                states[1].children[0].setAttribute("class","tl-dot done");
+                states[2].children[0].setAttribute("class","tl-dot current");
+                states[3].children[0].setAttribute("class","tl-dot future");
+                break;
+
+            case "listo":
+                states[0].children[0].setAttribute("class","tl-dot done");
+                states[1].children[0].setAttribute("class","tl-dot done");
+                states[2].children[0].setAttribute("class","tl-dot done");
+                states[3].children[0].setAttribute("class","tl-dot current");
+                break;
+        }
+        
     }
 
     function closePanel() {
@@ -605,11 +635,11 @@
     }
 
     /* ─── SELECT ORDER ─── */
-    function selectOrder(id) {
-        document.querySelectorAll('.order-row').forEach((r, i) => {
-            r.classList.toggle('selected', i === id - 1);
-        });
-        openPanel();
+    function selectOrder(e) {
+        if(!e)
+            return;
+ 
+        openPanel(e.dataset);
     }
 
     /* ─── MODAL ─── */
@@ -626,6 +656,17 @@
     }
 
     function submitOrder() {
+        
+        let empty_field = false;
+        document.querySelectorAll("#modal form input[type='text'], #modal form input[type='number']").forEach(field => {
+            if(field.value=="")
+                empty_field=true;
+        })
+
+        if(empty_field)
+            return;
+        
+        
         closeModal();
         toastMsg('✅ Nuevo pedido creado y enviado a cocina');
     }
@@ -643,6 +684,7 @@
     
     <% if(request.getAttribute("success") != null && request.getAttribute("success").equals("true")){
     	%>alert("exito en creación");<%
+        request.setAttribute("success","");
     }%>
         
         

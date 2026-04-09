@@ -54,7 +54,8 @@ public class ControladorPedServlet extends HttpServlet {
         String TableCustomer = request.getParameter("mesa-repartidor");
         String addressCustomer = request.getParameter("direccion-entrega");
         String itemsCustomer = request.getParameter("items-pedido");
-        float amountCustomer = Float.parseFloat(request.getParameter("total-pedido"));
+        String amountCustomerStr = request.getParameter("total-pedido");
+        float amountCustomer = 0.0f;
         String typePaymentCustomer = request.getParameter("tipo-pago");
         
         
@@ -76,12 +77,12 @@ public class ControladorPedServlet extends HttpServlet {
             errors.add("Es necesario especificar tipo de entrega");
         }
 
-        if ((typeReceivedCustomer.equalsIgnoreCase("salon")) && (TableCustomer == null || TableCustomer.isEmpty())) {
+        if ((TableCustomer == null || TableCustomer.isEmpty()) && ( typeReceivedCustomer != null && typeReceivedCustomer.equalsIgnoreCase("salon"))) {
             request.setAttribute("success", "false");
             errors.add("Si el pedido es para el salon, es necesario especificar la mesa");
         }
 
-        if ((typeReceivedCustomer.equalsIgnoreCase("delivery")) && (addressCustomer == null || addressCustomer.isEmpty())) {
+        if ((addressCustomer == null || addressCustomer.isEmpty()) && (typeReceivedCustomer != null && typeReceivedCustomer.equalsIgnoreCase("delivery"))) {
             request.setAttribute("success", "false");
             errors.add("Si el pedido es para enviar, la direccion no puede estar vacia");
         }
@@ -90,10 +91,12 @@ public class ControladorPedServlet extends HttpServlet {
             request.setAttribute("success", "false");
             errors.add("Es especificar los itemas que estan pedidos");
         }
-
-        if (amountCustomer <= 0 ) {
+        
+        if(amountCustomerStr == null || amountCustomerStr.isEmpty()){
             request.setAttribute("success", "false");
             errors.add("Es necesario especificar un precio valido para el pedido");
+        }else{
+            amountCustomer = Float.parseFloat(amountCustomerStr);
         }
 
         if (typePaymentCustomer == null || typePaymentCustomer.isEmpty()) {
@@ -107,18 +110,17 @@ public class ControladorPedServlet extends HttpServlet {
             request.getRequestDispatcher("index.jsp").forward(request, response);
         }
         
-        
 
         PedidoJpaController contr = new PedidoJpaController();
 
 
-        Pedido new_pedido = new Pedido(1313, nameCustomer,typeReceivedCustomer, addressCustomer, TableCustomer, amountCustomer, "preparacion", LocalDateTime.of(2026, Month.MARCH, 10, 14, 30), itemsCustomer);
+        Pedido new_pedido = new Pedido(1313, nameCustomer,typeReceivedCustomer, addressCustomer, TableCustomer, amountCustomer, "nuevo", LocalDateTime.of(2026, Month.MARCH, 10, 14, 30), itemsCustomer);
 
         contr.create(new_pedido);
         
         
-        request.getRequestDispatcher("index.jsp").forward(request, response);
-
+        //request.getRequestDispatcher("index.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath());
     }
 
     /**
@@ -128,7 +130,7 @@ public class ControladorPedServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // TODO Auto-generated method stub
-        response.getWriter().println("muy bien putito");
+        
         
         String new_state_order = request.getParameter("estado-nuevo");
         int id_order = Integer.parseInt(request.getParameter("id-pedido"));
